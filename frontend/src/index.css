@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+body {
+  font-family: "Arial", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f9fafb; /* 背景に薄いグレー */
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+a:hover {
+  color: #2563eb; /* ブルー */
+  text-decoration: underline;
+}
+
+h1, h2, h3 {
+  margin: 0;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  transition: box-shadow 0.3s;
+}
+
+.card:hover {
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+}
