@@ -182,7 +182,10 @@ func main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/health", healthCheckHandler).Methods("GET")
-	r.HandleFunc("/api/posts", getAllPosts).Methods("GET")
+	r.HandleFunc("/api/posts", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Received GET /api/posts")
+		getAllPosts(w, r)
+	}).Methods("GET")
 	r.HandleFunc("/api/posts/{id}", getPostByID).Methods("GET")
 	r.HandleFunc("/api/posts", createPost).Methods("POST") // 新規投稿エンドポイント
 	r.HandleFunc("/api/posts/{id}", updatePost).Methods("PUT")
