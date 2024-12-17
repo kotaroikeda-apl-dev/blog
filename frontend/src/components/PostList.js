@@ -6,7 +6,7 @@ const PostList = () => {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/posts")
+    fetch("http://blog-elb-767062822.ap-northeast-1.elb.amazonaws.com/api/posts")
       .then((response) => response.json())
       .then((data) => setPosts(data))
       .catch((error) => console.error("Error fetching posts:", error));

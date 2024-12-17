@@ -170,10 +170,18 @@ func renderMarkdown(w http.ResponseWriter, r *http.Request) {
 	w.Write(htmlContent)
 }
 
+// ヘルスチェック用のハンドラー
+func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	// レスポンスとしてステータス200とメッセージを返す
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"status": "ok"}`))
+}
+
 func main() {
 	initDB()
 
 	r := mux.NewRouter()
+	r.HandleFunc("/health", healthCheckHandler).Methods("GET")
 	r.HandleFunc("/api/posts", getAllPosts).Methods("GET")
 	r.HandleFunc("/api/posts/{id}", getPostByID).Methods("GET")
 	r.HandleFunc("/api/posts", createPost).Methods("POST") // 新規投稿エンドポイント
@@ -185,8 +193,9 @@ func main() {
 	log.Println("サーバーを起動します。ポート: 8080")
 	log.Fatal(http.ListenAndServe(":8080",
 		handlers.CORS(
-			handlers.AllowedOrigins([]string{"http://localhost:3000"}),                   // フロントエンドからのリクエストを許可
-			handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}), // 許可するHTTPメソッド
-			handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),           // 許可するヘッダー
+			handlers.AllowedOrigins([]string{"http://blog-elb-767062822.ap-northeast-1.elb.amazonaws.com"}), // ALBからのリクエストを許可
+			handlers.AllowedOrigins([]string{"http://localhost:3000"}),                                      // フロントエンドからのリクエストを許可
+			handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),                    // 許可するHTTPメソッド
+			handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),                              // 許可するヘッダー
 		)(r)))
 }

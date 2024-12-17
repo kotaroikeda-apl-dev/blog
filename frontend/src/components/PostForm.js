@@ -11,7 +11,7 @@ const PostForm = () => {
 
   useEffect(() => {
     if (id) {
-      fetch(`http://localhost:8080/api/posts/${id}`)
+      fetch(`http://blog-elb-767062822.ap-northeast-1.elb.amazonaws.com/api/posts/${id}`)
         .then((response) => response.json())
         .then((data) => {
           setTitle(data.Title || "");
@@ -29,8 +29,8 @@ const PostForm = () => {
 
     const method = id ? "PUT" : "POST";
     const url = id
-      ? `http://localhost:8080/api/posts/${id}`
-      : "http://localhost:8080/api/posts";
+      ? `http://blog-elb-767062822.ap-northeast-1.elb.amazonaws.com/api/posts/${id}`
+      : "http://blog-elb-767062822.ap-northeast-1.elb.amazonaws.com/api/posts";
 
     fetch(url, {
       method,

@@ -8,7 +8,7 @@ const PostDetail = () => {
   const [post, setPost] = useState(null);
 
   useEffect(() => {
-    fetch(`http://localhost:8080/api/posts/${id}`)
+    fetch(`http://blog-elb-767062822.ap-northeast-1.elb.amazonaws.com/api/posts/${id}`)
       .then((response) => response.json())
       .then((data) => setPost(data))
       .catch((error) => console.error("Error fetching post:", error));
@@ -24,7 +24,7 @@ const PostDetail = () => {
 
   const handleDelete = () => {
     if (window.confirm("本当にこの投稿を削除しますか？")) {
-      fetch(`http://localhost:8080/api/posts/${id}`, {
+      fetch(`http://blog-elb-767062822.ap-northeast-1.elb.amazonaws.com/api/posts/${id}`, {
         method: "DELETE",
       })
         .then((response) => {
