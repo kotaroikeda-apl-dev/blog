@@ -196,9 +196,9 @@ func main() {
 	log.Println("サーバーを起動します。ポート: 8080")
 	log.Fatal(http.ListenAndServe(":8080",
 		handlers.CORS(
-			handlers.AllowedOrigins([]string{"http://blog-elb-767062822.ap-northeast-1.elb.amazonaws.com"}), // ALBからのリクエストを許可
-			handlers.AllowedOrigins([]string{"http://localhost:3000"}),                                      // フロントエンドからのリクエストを許可
-			handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),                    // 許可するHTTPメソッド
-			handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),                              // 許可するヘッダー
+			handlers.AllowedOrigins([]string{"https://www.mynoteblog.com"}),              // ALBからのリクエストを許可
+			handlers.AllowedOrigins([]string{"http://localhost:3000"}),                   // フロントエンドからのリクエストを許可
+			handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}), // 許可するHTTPメソッド
+			handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),           // 許可するヘッダー
 		)(r)))
 }
