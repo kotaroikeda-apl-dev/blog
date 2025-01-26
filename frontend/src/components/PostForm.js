@@ -11,7 +11,7 @@ const PostForm = () => {
 
   useEffect(() => {
     if (id) {
-      fetch(`https://www.mynoteblog.com/api/posts/${id}`)
+      fetch(`${process.env.REACT_APP_URL_DOMAIN}/api/posts/${id}`)
         .then((response) => response.json())
         .then((data) => {
           setTitle(data.Title || "");
@@ -29,8 +29,8 @@ const PostForm = () => {
 
     const method = id ? "PUT" : "POST";
     const url = id
-      ? `https://www.mynoteblog.com/api/posts/${id}`
-      : "https://www.mynoteblog.com/api/posts";
+      ? `${process.env.REACT_APP_URL_DOMAIN}/api/posts/${id}`
+      : `${process.env.REACT_APP_URL_DOMAIN}/api/posts`;
 
     fetch(url, {
       method,

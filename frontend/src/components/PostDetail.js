@@ -8,7 +8,7 @@ const PostDetail = () => {
   const [post, setPost] = useState(null);
 
   useEffect(() => {
-    fetch(`https://www.mynoteblog.com/api/posts/${id}`)
+    fetch(`${process.env.REACT_APP_URL_DOMAIN}api/posts/${id}`)
       .then((response) => response.json())
       .then((data) => setPost(data))
       .catch((error) => console.error("Error fetching post:", error));
@@ -24,7 +24,7 @@ const PostDetail = () => {
 
   const handleDelete = () => {
     if (window.confirm("本当にこの投稿を削除しますか？")) {
-      fetch(`https://www.mynoteblog.com/api/posts/${id}`, {
+      fetch(`${process.env.REACT_APP_URL_DOMAIN}/api/posts/${id}`, {
         method: "DELETE",
       })
         .then((response) => {
