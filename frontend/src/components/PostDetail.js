@@ -8,7 +8,7 @@ const PostDetail = () => {
   const [post, setPost] = useState(null);
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_URL_DOMAIN}api/posts/${id}`)
+    fetch(`${process.env.REACT_APP_URL_DOMAIN}/api/posts/${id}`)
       .then((response) => response.json())
       .then((data) => setPost(data))
       .catch((error) => console.error("Error fetching post:", error));
