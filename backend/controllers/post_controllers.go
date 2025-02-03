@@ -96,7 +96,7 @@ func (c *PostController) DeletePost(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Status(http.StatusNoContent)
+	ctx.JSON(http.StatusOK, gin.H{"message": "Task deleted"})
 }
 
 // Markdown を HTML に変換して表示
