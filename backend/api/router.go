@@ -5,46 +5,38 @@ import (
 	"blog/middlewares"
 	"blog/repositories"
 	"blog/services"
-	"encoding/json"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func RegisterRoutes(db *gorm.DB) *mux.Router {
-	r := mux.NewRouter()
+func RegisterRoutes(db *gorm.DB) *gin.Engine {
+	r := gin.Default()
 
+	// CORS ミドルウェアを適用
 	r.Use(middlewares.CORSConfig())
 
+	// リポジトリ、サービス、コントローラーの初期化
 	repo := repositories.NewPostRepository(db)
 	service := services.NewPostService(repo)
 	postController := controllers.NewPostController(service)
 
-	r.HandleFunc("/api/posts", postController.GetAllPosts).Methods("GET")
-	r.HandleFunc("/api/posts/{id:[0-9]+}", postController.GetPostByID).Methods("GET")
-	r.HandleFunc("/api/posts", postController.CreatePost).Methods("POST")
-	r.HandleFunc("/api/posts/{id:[0-9]+}", postController.UpdatePost).Methods("PUT")
-	r.HandleFunc("/api/posts/{id:[0-9]+}", postController.DeletePost).Methods("DELETE")
-	r.HandleFunc("/api/posts/{id:[0-9]+}/render", postController.RenderMarkdown).Methods("GET")
+	// ルートグループを作成
+	api := r.Group("/api/posts")
+	{
+		api.GET("", postController.GetAllPosts)
+		api.GET("/:id", postController.GetPostByID)
+		api.POST("", postController.CreatePost)
+		api.PUT("/:id", postController.UpdatePost)
+		api.DELETE("/:id", postController.DeletePost)
+		api.GET("/:id/render", postController.RenderMarkdown)
+	}
 
-	// **OPTIONS リクエストを許可**
-	r.HandleFunc("/api/posts", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	}).Methods("OPTIONS")
-
-	r.HandleFunc("/api/posts/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	}).Methods("OPTIONS")
-
-	// ヘルスチェック
-	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]string{
-			"status": "healthy",
-		})
-	}).Methods("GET")
+	// ヘルスチェックエンドポイント
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "healthy"})
+	})
 
 	return r
 }

@@ -3,12 +3,11 @@ package controllers
 import (
 	"blog/models"
 	"blog/services"
-	"encoding/json"
 	"net/http"
 	"strconv"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gomarkdown/markdown"
-	"github.com/gorilla/mux"
 )
 
 type PostController struct {
@@ -19,108 +18,109 @@ func NewPostController(service services.PostService) *PostController {
 	return &PostController{service: service}
 }
 
-func (c *PostController) GetAllPosts(w http.ResponseWriter, r *http.Request) {
+// 全ての投稿を取得
+func (c *PostController) GetAllPosts(ctx *gin.Context) {
 	posts, err := c.service.GetAllPosts()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(posts)
+	ctx.JSON(http.StatusOK, posts)
 }
 
-func (c *PostController) GetPostByID(w http.ResponseWriter, r *http.Request) {
-	id, err := parseID(r)
+// ID から投稿を取得
+func (c *PostController) GetPostByID(ctx *gin.Context) {
+	id, err := parseID(ctx)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
 	post, err := c.service.GetPostByID(id)
 	if err != nil {
-		http.Error(w, "Post not found", http.StatusNotFound)
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(post)
+	ctx.JSON(http.StatusOK, post)
 }
 
-func (c *PostController) CreatePost(w http.ResponseWriter, r *http.Request) {
+// 新規投稿を作成
+func (c *PostController) CreatePost(ctx *gin.Context) {
 	var post models.Post
-	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+	if err := ctx.ShouldBindJSON(&post); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
 
 	if err := c.service.CreatePost(&post); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(post)
+	ctx.JSON(http.StatusCreated, post)
 }
 
-func (c *PostController) UpdatePost(w http.ResponseWriter, r *http.Request) {
-	id, err := parseID(r)
+// 投稿を更新
+func (c *PostController) UpdatePost(ctx *gin.Context) {
+	id, err := parseID(ctx)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
 	var post models.Post
-	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+	if err := ctx.ShouldBindJSON(&post); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
 
 	if err := c.service.UpdatePost(id, post); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(post)
+	ctx.JSON(http.StatusOK, post)
 }
 
-func (c *PostController) DeletePost(w http.ResponseWriter, r *http.Request) {
-	id, err := parseID(r)
+// 投稿を削除
+func (c *PostController) DeletePost(ctx *gin.Context) {
+	id, err := parseID(ctx)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
 	if err := c.service.DeletePost(id); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	ctx.Status(http.StatusNoContent)
 }
 
-func (c *PostController) RenderMarkdown(w http.ResponseWriter, r *http.Request) {
-	id, err := parseID(r)
+// Markdown を HTML に変換して表示
+func (c *PostController) RenderMarkdown(ctx *gin.Context) {
+	id, err := parseID(ctx)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
 	post, err := c.service.GetPostByID(id)
 	if err != nil {
-		http.Error(w, "Post not found", http.StatusNotFound)
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 		return
 	}
 
 	htmlContent := markdown.ToHTML([]byte(post.Content), nil, nil)
-	w.Header().Set("Content-Type", "text/html")
-	w.Write(htmlContent)
+	ctx.Data(http.StatusOK, "text/html", htmlContent)
 }
 
-func parseID(r *http.Request) (uint, error) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
+// Gin のパスパラメータから ID を取得
+func parseID(ctx *gin.Context) (uint, error) {
+	idStr := ctx.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		return 0, err
 	}
